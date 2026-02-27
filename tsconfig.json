@@ -5,6 +5,12 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "lib": ["ESNext"],
-    "noUnusedParameters": false
-  }
+    "noUnusedParameters": false,
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
 }
