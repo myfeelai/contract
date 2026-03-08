@@ -1,9 +1,19 @@
-import EventEmitter from "events";
+import { EventEmitter } from "events";
+
+/** Minimal WebSocket interface compatible with both DOM and Cloudflare Workers. */
+interface WebSocketLike {
+  send(data: string): void;
+  close(code?: number, reason?: string): void;
+  onopen: ((ev: any) => void) | null;
+  onclose: ((ev: any) => void) | null;
+  onerror: ((ev: any) => void) | null;
+  onmessage: ((ev: any) => void) | null;
+}
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export type SocketClient<ClientEM extends {} = {}, ServerEM extends {} = {}> = {
-  websocket?: WebSocket;
+  websocket?: WebSocketLike;
   emitter: EventEmitter;
   state: "connecting" | "connected" | "disconnected" | "destroyed";
   onReconnected?: () => void;
@@ -18,7 +28,7 @@ export type SocketClient<ClientEM extends {} = {}, ServerEM extends {} = {}> = {
 };
 
 export class Socket {
-  websocket?: WebSocket;
+  websocket?: WebSocketLike;
   wsUrl: string;
 
   connectPromise?: Promise<void>;
@@ -51,7 +61,7 @@ export class Socket {
   }
 
   private _createWs(onSuccess: () => void, onError: () => void) {
-    const ws = new WebSocket(this.wsUrl);
+    const ws = new WebSocket(this.wsUrl) as unknown as WebSocketLike;
     this.websocket = ws;
     this.state = "connecting";
     ws.onopen = () => {
@@ -68,7 +78,7 @@ export class Socket {
       this.websocket = undefined;
       onError();
     };
-    ws.onmessage = (message) => {
+    ws.onmessage = (message: { data: any }) => {
       const value = JSON.parse(message.data as string);
       this.emitter.emit(value.type, value.payload);
     };
