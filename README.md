@@ -143,3 +143,4 @@ The main builder class to compose your definition.
 - `.api(apiMap)`
 - `.stream(streamMap)`
 - `.socket(socketMap)`
+  a

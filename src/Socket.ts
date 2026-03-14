@@ -1,5 +1,7 @@
 import { EventEmitter } from "events";
 
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 /** Minimal WebSocket interface compatible with both DOM and Cloudflare Workers. */
 interface WebSocketLike {
   send(data: string): void;
@@ -9,8 +11,6 @@ interface WebSocketLike {
   onerror: ((ev: any) => void) | null;
   onmessage: ((ev: any) => void) | null;
 }
-
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export type SocketClient<ClientEM extends {} = {}, ServerEM extends {} = {}> = {
   websocket?: WebSocketLike;
@@ -31,7 +31,6 @@ export class Socket {
   websocket?: WebSocketLike;
   wsUrl: string;
 
-  connectPromise?: Promise<void>;
   state: "connecting" | "connected" | "disconnected" | "destroyed" = "disconnected";
 
   _firstConnect = true;
@@ -66,9 +65,9 @@ export class Socket {
     this.state = "connecting";
     ws.onopen = () => {
       this.state = "connected";
-      this.connectPromise = undefined;
       onSuccess();
       if (this._firstConnect) {
+        this.emitter.emit("__firstConnect");
         this._firstConnect = false;
       }
     };
@@ -91,32 +90,25 @@ export class Socket {
   }
 
   connect() {
-    if (this.connectPromise) return this.connectPromise;
-    this.connectPromise = new Promise((resolve) => {
-      this._createWs(
-        () => {
-          resolve();
-          if (!this._firstConnect) {
-            this.onReconnected?.();
-          }
-        },
-        async () => {
-          this.connectPromise = undefined;
-          await sleep(200);
-          return this.connect();
-        },
-      );
+    return new Promise<void>((resolve) => {
+      if (this.state === "connecting") {
+        this.emitter.once("__firstConnect", () => resolve());
+      } else {
+        this.emitter.once("__firstConnect", () => resolve());
+        this._createWs(
+          () => {},
+          async () => {
+            await sleep(200);
+            this.connect();
+          },
+        );
+      }
     });
-    return this.connectPromise;
   }
 
   async emit(eventName: string, payload: any) {
     if (this.state !== "connected") {
-      if (this.connectPromise) {
-        await this.connectPromise;
-      } else {
-        await this.connect();
-      }
+      await this.connect();
     }
     const message = JSON.stringify({ type: eventName, payload });
     this.websocket?.send(message);
@@ -148,6 +140,5 @@ export class Socket {
     this.emitter.removeAllListeners();
     this.websocket?.close();
     this.websocket = undefined;
-    this.connectPromise = undefined;
   }
 }
