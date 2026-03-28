@@ -1,6 +1,6 @@
 {
   "name": "@feelai/contract",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/myfeelai/contract.git"
@@ -20,9 +20,9 @@
     "test": "bun test"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "dependencies": {
-    "typebox": "^1.0.71"
+    "typebox": "^1.1.7"
   }
 }
