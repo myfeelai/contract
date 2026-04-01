@@ -1,6 +1,6 @@
 {
   "name": "@feelai/contract",
-  "version": "1.0.10",
+  "version": "1.1.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/myfeelai/contract.git"
@@ -13,17 +13,18 @@
     "types": "dist/index.d.ts"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "scripts": {
     "build": "tsc",
-    "test": "bun test"
+    "test": "bun test",
+    "prepublishOnly": "bun run scripts/prepublish.ts",
+    "postpublish": "bun run scripts/postpublish.ts"
   },
   "devDependencies": {
     "typescript": "^6.0.2"
   },
   "dependencies": {
-    "typebox": "^1.1.12"
+    "typebox": "^1.1.13"
   }
 }
