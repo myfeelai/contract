@@ -1,6 +1,6 @@
 {
   "name": "@feelai/contract",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/myfeelai/contract.git"
@@ -12,6 +12,10 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "bun test"
